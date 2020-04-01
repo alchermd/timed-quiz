@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
@@ -12,6 +13,7 @@ import (
 func main() {
 	csvFilename := flag.String("csv", "problems.csv", "a csv file in the format of 'question, answer'")
 	timeLimit := flag.Int("limit", 30, "the time limit of the quiz in seconds")
+	isShuffled := flag.Bool("shuffle", false, "if the questions should be shuffled")
 	flag.Parse()
 
 	file, err := os.Open(*csvFilename)
@@ -28,6 +30,14 @@ func main() {
 	timer := time.NewTimer(time.Duration(*timeLimit) * time.Second)
 
 	problems := parseLines(lines)
+
+	if *isShuffled {
+		rand.Seed(time.Now().UnixNano())
+		rand.Shuffle(len(problems), func(i, j int) {
+			problems[i], problems[j] = problems[j], problems[i]
+		})
+	}
+
 	correct := 0
 	for i, p := range problems {
 		fmt.Printf("Problem #%d: %s = ", i+1, p.q)
